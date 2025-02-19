@@ -7,7 +7,6 @@ Este é um jogo de Wordle em português desenvolvido com Next.js, que utiliza a 
 - Jogo de Wordle em português europeu
 - Validação de palavras através da API Dicionário Aberto
 - Interface responsiva
-- Registo de estatísticas do jogador (opcional)
 
 ## 🛠 Tecnologias Utilizadas
 
