@@ -19,8 +19,8 @@ Este é um jogo de Wordle em português desenvolvido com Next.js, que utiliza a 
 
 1. Clona o repositório:
    ```sh
-   git clone https://github.com/teu-usuario/wordle-pt.git
-   cd wordle-pt
+   git clone https://github.com/SkyGlis/Wordle-Tuga.git
+   cd Wordle-Tuga
    ```
 2. Instala as dependências:
    ```sh
