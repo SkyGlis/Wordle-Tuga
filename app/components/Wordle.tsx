@@ -10,10 +10,9 @@ const fetchPortugueseWord = async (length: number | null): Promise<string | null
       const response = await fetch("https://api.dicionario-aberto.net/random");
       const data = await response.json();
       word = data.word.toUpperCase();
-      console.log(word)
     }
 
-    console.log(word)
+    console.log(`Solução: ${word}`)
     return word;
   } catch (error) {
     console.error("Error fetching word:", error);

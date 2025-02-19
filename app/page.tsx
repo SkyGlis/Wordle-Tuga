@@ -32,7 +32,7 @@ const GameWrapper = () => {
         <h1 className="text-3xl sm:text-6xl font-extrabold bg-gradient-to-r from-red-600 via-yellow-500 to-green-600 inline-block text-transparent bg-clip-text mb-6">
           Wordle Tuga
         </h1>
-        <Wordle length={5} attempts={6} />
+        <Wordle length={Number(length)} attempts={Number(attempts)} />
       </div>
     </main>
   ) : (
