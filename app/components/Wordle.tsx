@@ -2,36 +2,40 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
+import Dicionario from '@/dicionario.json';
+
+const dicionario: DicionarioInterface = Dicionario;
+
+interface DicionarioInterface {
+  [length: number]: string[];
+}
 
 /*
-Não existe método diferente para conseguir as palavras com esta API,
-pois não tem um random com um nº de letras específicas.
-Basicamente continua a pedir palavras à API até que ela devolva uma
-com o mesmo número de letras da pedida.
+Função que usa o ficheiro JSON que contém as palavras do
+dicionário, fica mais rápido para carregar
 */
 
-const fetchPortugueseWord = async (length: number | null): Promise<string | null> => {
+const fetchPortugueseWordV2 = async (length: number): Promise<string | null> => {
   try {
-    let word: string | null = null;
+    const palavras = dicionario[length];
     
-    while (!word || word.length !== length) {
-      const response = await fetch("https://api.dicionario-aberto.net/random");
-      const data = await response.json();
-      word = data.word.toUpperCase();
+    if (!palavras) {
+      console.error(`Não há palavras com ${length} letras.`);
+      return null;
     }
-    // word = cleanSpecialChars(word);
 
-    console.log(`Solução: ${word}`);
+    const randomWord = cleanSpecialChars(palavras[Math.floor(Math.random() * palavras.length)]);
+    console.log(randomWord)
 
-    return word;
+    return randomWord.toUpperCase();
   } catch (error) {
-    console.error("Error fetching word:", error);
+    console.error("Erro ao buscar palavra:", error);
     return "CASA";
   }
 };
 
+
 // Limpar caracteres especiais e acentos
-/*
 const cleanSpecialChars = (string: string) => {
   const defaultDiacriticsRemovalMap = [
     {'base':'A', 'letters':/[\u0041\u24B6\uFF21\u00C0\u00C1\u00C2\u1EA6\u1EA4\u1EAA\u1EA8\u00C3\u0100\u0102\u1EB0\u1EAE\u1EB4\u1EB2\u0226\u01E0\u00C4\u01DE\u1EA2\u00C5\u01FA\u01CD\u0200\u0202\u1EA0\u1EAC\u1EB6\u1E00\u0104\u023A\u2C6F]/g},
@@ -120,24 +124,32 @@ const cleanSpecialChars = (string: string) => {
     {'base':'z','letters':/[\u007A\u24E9\uFF5A\u017A\u1E91\u017C\u017E\u1E93\u1E95\u01B6\u0225\u0240\u2C6C\uA763]/g}
   ];
 
-  for(var i=0; i<defaultDiacriticsRemovalMap.length; i++) {
+  for(let i = 0; i<defaultDiacriticsRemovalMap.length; i++) {
     string = string.replace(defaultDiacriticsRemovalMap[i].letters, defaultDiacriticsRemovalMap[i].base);
   }
 
   return string;
 }
-*/
 
-const checkWordExists = async (word: string): Promise<boolean> => {
+const checkWordExists = async (word: string, length: number): Promise<boolean> => {
   try {
-    const response = await fetch(`https://api.dicionario-aberto.net/word/${word.toLowerCase()}`);
-    const data = await response.json();
-    return data.length > 0;
+    const wordsWithLength = dicionario[length] || [];
+
+    const wordExists = wordsWithLength.includes(word.toLowerCase());
+
+    if (wordExists) {
+      console.log(`A palavra "${word}" existe no dicionário com ${length} letras.`);
+    } else {
+      console.log(`A palavra "${word}" NÃO existe no dicionário com ${length} letras.`);
+    }
+
+    return wordExists;
   } catch (error) {
     console.error("Erro ao verificar palavra:", error);
     return false;
   }
 };
+
 
 const Wordle = ({ length, attempts }: { length: number | 0; attempts: number | null }) => {
   const router = useRouter();
@@ -152,10 +164,6 @@ const Wordle = ({ length, attempts }: { length: number | 0; attempts: number | n
   const menuRedirect = () => {
     router.push(`/`);
   }
-  
-  useEffect(() => {
-    newGame();
-  }, [length]);
 
   // Função para inciar o jogo, limpo os estados pois utilizo para também reiniciar
   const newGame = useCallback(async () => {
@@ -164,10 +172,14 @@ const Wordle = ({ length, attempts }: { length: number | 0; attempts: number | n
     setGuesses([]);
     setCurrentGuess("");
     setErrorMessage("");
-    const word = await fetchPortugueseWord(length);
+    const word = await fetchPortugueseWordV2(length);
     setTargetWord(word);
     setLoading(false);
   }, [length]);
+
+  useEffect(() => {
+    newGame();
+  }, [length, newGame]);
 
   // Cada vez que o nº de tentativas é atualizado, verifica se o jogo já acabou ou não
   useEffect(() => {
@@ -191,7 +203,7 @@ const Wordle = ({ length, attempts }: { length: number | 0; attempts: number | n
         return prev.slice(0, -1);
       });
     } else if (e.key === "Enter" && currentGuess.length === length) {
-      const isValidWord = await checkWordExists(currentGuess);
+      const isValidWord = await checkWordExists(currentGuess, length);
       
       if (!isValidWord) {
         setErrorMessage("Palavra inválida! Tente novamente.");
@@ -210,7 +222,6 @@ const Wordle = ({ length, attempts }: { length: number | 0; attempts: number | n
   - Amarelo: letra pertence mas está na posição errada
   - Verde: letra pertence e está na posição certa
   */
-
   const setBlockColor = (letter: string, index: number) => {
     if (!targetWord) return "bg-gray-700";
     if (targetWord[index] === letter) return "bg-green-500";
