@@ -6,16 +6,16 @@ import { useState, Suspense } from "react";
 import { VscAccount } from "react-icons/vsc";
 
 const GameWrapper = () => {
-  const [numWords, setNumWords] = useState<number | null>(null);
+  const [numLetters, setnumLetters] = useState<number | null>(null);
   const [numAttempts, setNumAttempts] = useState<number | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
 
 
   const startGame = () => {
-    if (numWords && numAttempts) {
+    if (numLetters && numAttempts) {
       const newSearchParams = new URLSearchParams();
-      newSearchParams.set("length", numWords.toString());
+      newSearchParams.set("length", numLetters.toString());
       newSearchParams.set("attempts", numAttempts.toString());
 
       router.push(`/?${newSearchParams.toString()}`);
@@ -43,13 +43,13 @@ const GameWrapper = () => {
       </h1>
       <div className="flex flex-col gap-4">
         <label className="text-white text-lg">
-          Número de Palavras:
+          Número de letras:
           <input
             type="number"
             min="1"
             max="10"
-            value={numWords || ""}
-            onChange={(e) => setNumWords(Number(e.target.value))}
+            value={numLetters || ""}
+            onChange={(e) => setnumLetters(Number(e.target.value))}
             className="ml-2 px-2 py-1 text-lg rounded bg-gray-800 text-white border border-gray-500"
           />
         </label>
@@ -81,7 +81,7 @@ const GameWrapper = () => {
 export default function Home() {
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <Suspense fallback={<p>Loading...</p>}>
+      <Suspense fallback={<p>Carregando...</p>}>
         <GameWrapper />
       </Suspense>
 
